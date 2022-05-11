@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import {PlacesProvider} from './context';
+import {PlacesProvider, MapsProvider} from './context';
 import MapsApp from './MapsApp';
 import mapboxgl from 'mapbox-gl'; // or "const mapboxgl = require('mapbox-gl');"
 
@@ -18,7 +18,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <PlacesProvider>
-      <MapsApp />
+      <MapsProvider>
+        <MapsApp />
+      </MapsProvider>
     </PlacesProvider>
   </React.StrictMode>,
 );
