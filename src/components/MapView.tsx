@@ -1,20 +1,22 @@
 import {Map} from 'mapbox-gl';
 import {useRef, useLayoutEffect} from 'react';
-import {usePlaces} from '../context';
+import {useMap, usePlaces} from '../context';
 import Loading from './Loading';
 
 const MapView = () => {
   const {isLoading, userLocation} = usePlaces();
   const mapView = useRef<HTMLDivElement>(null);
+  const {setMap} = useMap();
 
   useLayoutEffect(() => {
     if (!isLoading) {
-      new Map({
+      const map = new Map({
         container: mapView.current!,
-        style: 'mapbox://styles/mapbox/streets-v11', // style URL
+        style: 'mapbox://styles/mapbox/dark-v10', // style URL
         center: userLocation,
         zoom: 9, // starting zoom
       });
+      setMap(map);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading]);
@@ -26,7 +28,6 @@ const MapView = () => {
     <div
       ref={mapView}
       style={{
-        backgroundColor: 'red',
         height: '100vh',
         width: '100vw',
         position: 'fixed',
