@@ -1,15 +1,22 @@
 import {createContext, useContext, useEffect, useReducer} from 'react';
 import {getUserLocation} from '../helpers';
-interface PlacesContextProps extends PlacesState {}
+import {Feature, PlacesResponse} from '../interfaces/places';
+import searchAPI from '../MapHandler';
+interface PlacesContextProps extends PlacesState {
+  searchPlacesByTerm: (query: string) => Promise<Feature[]>;
+}
 
 const PlacesContext = createContext<PlacesContextProps>(
   {} as PlacesContextProps,
 );
 
-type PlacesAction = {
-  type: 'setUserLocation';
-  payload: [number, number];
-};
+type PlacesAction =
+  | {
+      type: 'setUserLocation';
+      payload: [number, number];
+    }
+  | {type: 'setPlaces'; payload: Feature[]}
+  | {type: 'setLoadingPlaces'};
 
 const PlacesReducer = (
   state: PlacesState,
@@ -22,6 +29,18 @@ const PlacesReducer = (
         isLoading: false,
         userLocation: action.payload,
       };
+    case 'setLoadingPlaces':
+      return {
+        ...state,
+        isLoadingPlaces: true,
+        places: [],
+      };
+    case 'setPlaces':
+      return {
+        ...state,
+        places: action.payload,
+        isLoadingPlaces: false,
+      };
     default:
       return state;
   }
@@ -30,11 +49,15 @@ const PlacesReducer = (
 interface PlacesState {
   isLoading: boolean;
   userLocation?: [number, number];
+  isLoadingPlaces: boolean;
+  places: Feature[];
 }
 
 const INITIAL_STATE: PlacesState = {
   isLoading: true,
   userLocation: undefined,
+  isLoadingPlaces: false,
+  places: [],
 };
 
 const PlacesProvider = ({
@@ -50,8 +73,25 @@ const PlacesProvider = ({
     );
   }, []);
 
+  const searchPlacesByTerm = async (query: string) => {
+    if (query.length === 0) {
+      return []; // TODO: Limpiar State
+    }
+    if (!state.userLocation) {
+      throw new Error('No hay ubicación del usuario');
+    }
+    dispatch({type: 'setLoadingPlaces'});
+    const resp = await searchAPI.get<PlacesResponse>(`/${query}.json`, {
+      params: {
+        proximity: state.userLocation.join(','),
+      },
+    });
+    dispatch({type: 'setPlaces', payload: resp.data.features});
+    return resp.data.features;
+  };
+
   return (
-    <PlacesContext.Provider value={{...state}}>
+    <PlacesContext.Provider value={{...state, searchPlacesByTerm}}>
       {children}
     </PlacesContext.Provider>
   );
