@@ -1,5 +1,6 @@
 import {ChangeEvent, useRef} from 'react';
 import {usePlaces} from '../context';
+import SearchResults from './SearchResults';
 
 const SearchBar = () => {
   const debounceRef = useRef<NodeJS.Timeout>();
@@ -21,6 +22,7 @@ const SearchBar = () => {
         placeholder="Buscar lugar..."
         onChange={onQueryChanged}
       />
+      <SearchResults />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import {createContext, useContext, useEffect, useReducer} from 'react';
 import {getUserLocation} from '../helpers';
 import {Feature, PlacesResponse} from '../interfaces/places';
-import searchAPI from '../MapHandler';
+import {searchAPI} from '../MapHandler';
 interface PlacesContextProps extends PlacesState {
   searchPlacesByTerm: (query: string) => Promise<Feature[]>;
 }
@@ -75,7 +75,8 @@ const PlacesProvider = ({
 
   const searchPlacesByTerm = async (query: string) => {
     if (query.length === 0) {
-      return []; // TODO: Limpiar State
+      dispatch({type: 'setPlaces', payload: []});
+      return [];
     }
     if (!state.userLocation) {
       throw new Error('No hay ubicación del usuario');
